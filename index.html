@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Briefing File</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Vista 1: subir PDF -->
+    <main id="uploadView" class="upload-view">
+      <div class="brand">
+        <h1>Briefing File</h1>
+        <p>Convierte un catálogo PDF en un archivo de briefing</p>
+      </div>
+
+      <a class="feed-pill" data-feed href="http://127.0.0.1:8000/status" target="_blank" rel="noopener" data-state="checking" title="Abrir estado del servidor">
+        <span class="dot"></span>
+        <span class="txt">Comprobando…</span>
+      </a>
+
+      <div id="dropZone" class="dropzone" tabindex="0" role="button" aria-label="Seleccionar PDF">
+        <div class="drop-idle" id="dropIdle">
+          <div class="drop-icon">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 16V4" />
+              <path d="M7 9l5-5 5 5" />
+              <path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
+            </svg>
+          </div>
+          <h2>Arrastra tu PDF aquí</h2>
+          <p>o <span class="link">selecciona un archivo</span></p>
+        </div>
+        <div class="drop-busy" id="dropBusy" hidden>
+          <div class="spinner"></div>
+          <p id="progressText">Leyendo PDF…</p>
+        </div>
+      </div>
+
+      <input type="file" id="fileInput" accept="application/pdf" hidden />
+      <p id="uploadError" class="error" hidden></p>
+    </main>
+
+    <!-- Vista 2: espacio de trabajo -->
+    <section id="workspaceView" class="workspace" hidden>
+      <header class="topbar">
+        <div class="file-info">
+          <div class="file-icon">PDF</div>
+          <div class="file-meta">
+            <div class="file-name" id="wsTitle"></div>
+            <div class="file-sub">Revisa las filas, edita lo necesario y exporta</div>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <label class="utm-field">
+            <span>UTM</span>
+            <input id="utmInput" type="text" placeholder="utm_source=…" autocomplete="off" spellcheck="false" />
+          </label>
+          <a class="feed-pill" data-feed href="http://127.0.0.1:8000/status" target="_blank" rel="noopener" data-state="checking" title="Abrir estado del servidor">
+            <span class="dot"></span>
+            <span class="txt">Comprobando…</span>
+          </a>
+          <button id="toggleTools" class="btn ghost tools-toggle" type="button" aria-expanded="false" aria-controls="toolsRow">
+            <span>Herramientas</span>
+            <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Segunda fila (plegable) -->
+      <section id="toolsRow" class="tools-row" hidden>
+        <div class="tools-main">
+          <div class="tools-line">
+            <span class="tools-label">Filas</span>
+            <div class="chips" id="summary"></div>
+          </div>
+          <div class="tools-line">
+            <span class="tools-label">Columnas en tabla</span>
+            <div class="col-toggles" id="viewChecks"></div>
+            <button id="showAllCols" class="link-btn" type="button">Mostrar todas</button>
+          </div>
+        </div>
+
+        <div class="tools-actions">
+          <button id="checkManual" class="btn" disabled>Buscar manuales en feed</button>
+          <button id="openExport" class="btn primary" disabled>Exportar Excel</button>
+        </div>
+      </section>
+
+      <div class="content">
+        <aside class="sidebar card" id="sidebar"></aside>
+        <div class="resizer" id="resizer" title="Arrastra para cambiar el ancho"></div>
+
+        <section class="table-card card">
+          <div class="table-scroll">
+            <table>
+              <colgroup>
+                <col class="c-activo" />
+                <col class="c-idx" />
+                <col class="c-sku" />
+                <col class="c-feed-id" />
+                <col class="c-titulo" />
+                <col class="c-feed-name" />
+                <col class="c-precio-orig" />
+                <col class="c-precio-final" />
+                <col class="c-url" />
+                <col class="c-pagina" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>Activo</th>
+                  <th>#</th>
+                  <th>SKU</th>
+                  <th>ID en feed</th>
+                  <th>Título</th>
+                  <th>Nombre en feed</th>
+                  <th class="num">Precio original</th>
+                  <th class="num">Precio final</th>
+                  <th>URL</th>
+                  <th>Página</th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- Modal: solo columnas del Excel y descarga -->
+    <div id="exportModal" class="modal" hidden>
+      <div class="modal-backdrop" data-close></div>
+      <div class="modal-card card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <header class="modal-head">
+          <h3 id="modalTitle">Exportar Excel</h3>
+          <button type="button" class="icon-btn" data-close aria-label="Cerrar">×</button>
+        </header>
+
+        <section class="modal-section">
+          <div class="modal-label">Columnas del Excel</div>
+          <div class="check-grid">
+            <label class="check">
+              <input type="checkbox" id="exSku" checked disabled />
+              <span>SKU<small>product_id · siempre</small></span>
+            </label>
+            <label class="check">
+              <input type="checkbox" id="exTitle" checked />
+              <span>Título<small>header</small></span>
+            </label>
+            <label class="check">
+              <input type="checkbox" id="exChapter" checked />
+              <span>Capítulo<small>section</small></span>
+            </label>
+            <label class="check">
+              <input type="checkbox" id="exLink" checked />
+              <span>Link<small>columna link · con UTM</small></span>
+            </label>
+          </div>
+        </section>
+
+        <footer class="modal-foot">
+          <button type="button" id="dlExcel" class="btn primary">Descargar Excel</button>
+        </footer>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>
