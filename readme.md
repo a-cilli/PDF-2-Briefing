@@ -210,7 +210,7 @@ The catalog pages appear on the left. Each code found has a yellow box.
 - **Click a box** and the table scrolls to that row.
 - You can **drag the gray line** between the preview and the table to resize each one.
 
-#### 5. Editing
+#### 5. Editing and buttons
 
 - **Double-click** the title to change it. Enter saves, Escape cancels.
 - **Copy button** appears when you hover over the title or the feed name.
@@ -285,6 +285,8 @@ Image buttons are enabled once the feed server has loaded and there are products
 
 Opens a large window with the product list on the left and the images on the right.
 
+- **Click a row** in the list to open that product.
+- **Click an image**, or press its number, to turn it on or off.
 - **← →** change product.
 - **1 to 9** turn the image with that number on or off.
 - **Solo la 1ª** and **Solo la 2ª** apply only to the product you're viewing.
@@ -321,7 +323,15 @@ The UTM doesn't change the saved URL; it's only added when exporting.
 
 The file is named **Briefing File.xlsx**. It only includes active rows. Deactivated rows and rows hidden in the table are not exported.
 
-#### 13. Start with another PDF
+#### 13. Help
+
+Click the **?** button to open the help window. It has 10 pages that explain the tool, with visual examples of the buttons, rows, and windows.
+
+- The **?** button appears on the start screen (top right) and in the top bar of the workspace.
+- Use **EN** or **ES** at the top of the window to change the language. The choice is saved in the browser, so the next time you open the app it stays the same. English is the default.
+- Use **Anterior** (Previous) and **Siguiente** (Next) to move between pages, or the arrow keys. **Esc** closes the window.
+
+#### 14. Start with another PDF
 
 Refresh the browser page (F5 or Ctrl + R). You return to the start screen. Data from the previous PDF is lost if you haven't exported, so export first.
 
@@ -362,6 +372,9 @@ Don't switch tabs or move the window during the capture. If the page moved while
 **The capture button does nothing or looks disabled.**
 It's enabled when at least one image is active. Also check that the feed server is running.
 
+**The ? button doesn't open anything.**
+Make sure `js/main.js` calls `initHelp()` and that the app was opened with Live Server. Press F12, check the Console tab for red errors, and reload the page.
+
 ---
 
 ### Maintenance and changes
@@ -373,6 +386,7 @@ As noted at the start, this project is provided without official support. If you
 - **Table logic:** `js/ui/table.js`
 - **Copy and link buttons:** `js/ui/buttons.js`
 - **Images, photo selection mode, and ZIP capture:** `js/ui/images.js`
+- **Help window, its pages, and its language:** `js/ui/help.js`
 - **Upload flow and waiting for the feed:** `js/ui/upload.js` and `js/feed/status.js`
 - **PDF reading:** `js/pdf/`
 - **Feed lookup:** `feed_server.py`
@@ -591,7 +605,7 @@ A la izquierda aparecen las páginas del catálogo. Cada código encontrado tien
 - **Haz clic en un recuadro** y la tabla se desplaza a esa fila.
 - Puedes **arrastrar la línea gris** entre la vista previa y la tabla para cambiar el tamaño de cada parte.
 
-#### 5. Editar
+#### 5. Editar y botones
 
 - **Doble clic** en el título para cambiarlo. Enter guarda, Escape cancela.
 - **Botón de copiar** que aparece al pasar el mouse sobre el título o el nombre del feed.
@@ -666,6 +680,8 @@ Los botones de imágenes se activan cuando el servidor del feed ya cargó y hay 
 
 Abre una ventana grande con la lista de productos a la izquierda y las imágenes a la derecha.
 
+- **Haz clic en una fila** de la lista para abrir ese producto.
+- **Haz clic en una imagen**, o presiona su número, para activarla o desactivarla.
 - **← →** cambian de producto.
 - **1 a 9** activan o desactivan la imagen con ese número.
 - **Solo la 1ª** y **Solo la 2ª** aplican solo al producto que estás viendo.
@@ -702,7 +718,15 @@ El UTM no cambia la URL guardada; solo se agrega al exportar.
 
 El archivo se llama **Briefing File.xlsx**. Solo incluye las filas activas. Las filas desactivadas y las ocultas en la tabla no se exportan.
 
-#### 13. Empezar con otro PDF
+#### 13. Ayuda
+
+Haz clic en el botón **?** para abrir la ventana de ayuda. Tiene 10 páginas que explican la herramienta, con ejemplos visuales de los botones, las filas y las ventanas.
+
+- El botón **?** aparece en la pantalla de inicio (esquina superior derecha) y en la barra superior del espacio de trabajo.
+- Usa **EN** o **ES** en la parte superior de la ventana para cambiar el idioma. La elección se guarda en el navegador, así que la próxima vez que abras la aplicación seguirá igual. El inglés es el idioma por defecto.
+- Usa **Anterior** y **Siguiente** para moverte entre páginas, o las flechas del teclado. **Esc** cierra la ventana.
+
+#### 14. Empezar con otro PDF
 
 Actualiza la página del navegador (F5 o Ctrl + R). Vuelves a la pantalla de inicio. Los datos del PDF anterior se pierden si no exportaste, así que exporta antes.
 
@@ -743,6 +767,9 @@ No cambies de pestaña ni muevas la ventana durante la captura. Si la página se
 **El botón de captura no hace nada o aparece apagado.**
 Se activa cuando hay al menos una imagen activa. Revisa también que el servidor del feed esté funcionando.
 
+**El botón ? no abre nada.**
+Revisa que `js/main.js` llame a `initHelp()` y que la aplicación se abra con Live Server. Presiona F12, revisa la pestaña Console por errores en rojo y recarga la página.
+
 ---
 
 ### Mantenimiento y cambios
@@ -754,6 +781,7 @@ Como se indicó al inicio, este proyecto se entrega sin soporte oficial. Si quie
 - **Lógica de la tabla:** `js/ui/table.js`
 - **Botones de copiar y de enlace:** `js/ui/buttons.js`
 - **Imágenes, modo selección y captura en ZIP:** `js/ui/images.js`
+- **Ventana de ayuda, sus páginas e idioma:** `js/ui/help.js`
 - **Flujo de subida y espera del feed:** `js/ui/upload.js` y `js/feed/status.js`
 - **Lectura del PDF:** `js/pdf/`
 - **Consulta del feed:** `feed_server.py`

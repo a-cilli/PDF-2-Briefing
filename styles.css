@@ -1145,3 +1145,272 @@ tr.gap.locked:hover td {
 .photo-table tr { cursor: pointer; }
 .photo-table tr:hover td { background: #f7f9ff; }
 .photo-table tr.on td { background: var(--accent-soft); font-weight: 700; }
+
+/* =====================================================================
+   15. AYUDA: botón "?" y modal de ayuda
+   ===================================================================== */
+
+/* Botón "?": mismo alto que el botón de Herramientas */
+.help-btn {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-grid;
+  place-items: center;
+}
+
+/* En la pantalla de inicio, el botón va en la esquina superior derecha */
+.upload-view { position: relative; }
+.upload-help {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+/* Modal de ayuda */
+#helpModal { z-index: 70; }
+.help-card {
+  width: min(820px, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  display: flex;
+  flex-direction: column;
+}
+.help-head-right { display: flex; align-items: center; gap: 0.6rem; }
+.help-lang { display: flex; gap: 0.35rem; }
+.help-lang .btn.sm.on {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.help-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 1rem 1.25rem;
+  line-height: 1.5;
+}
+.help-body h4 { margin: 0 0 0.6rem; font-size: 1.05rem; }
+.help-body p { margin: 0.5rem 0; }
+.help-body ul, .help-body ol { padding-left: 1.2rem; margin: 0.5rem 0; }
+.help-body code {
+  background: #f3f4f6;
+  padding: 1px 5px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+.help-foot {
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+}
+.help-counter { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+/* Maquetas: solo visuales, sin interacción */
+.mock {
+  pointer-events: none;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  background: #fafbfc;
+}
+.mk-bar { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.mk-utm-label { font-size: 12px; font-weight: 600; color: var(--muted); }
+.mk-field {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 12px;
+  color: var(--muted);
+}
+.mk-muted { color: var(--muted); }
+.mk-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #f0f1f5;
+  font-size: 13px;
+}
+.mk-row.mk-yellow { background: #fff8d6; }
+.mk-row.mk-red { box-shadow: inset 4px 0 0 #ef4444; }
+.mk-row.mk-lila { background: #f5efff; border-bottom: 1px dashed #c4a7f0; }
+.mk-row.mk-gray { background: #f3f4f6; color: #9ca3af; text-decoration: line-through; }
+.mk-plus {
+  align-self: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+.mk-tools { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.mock .col-toggle { cursor: default; }
+
+/* Títulos de cada maqueta */
+.mk-caption {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 10px 0 4px;
+}
+
+/* Fila de ejemplo con el + sobre la línea entre dos filas */
+.mk-stack { display: flex; flex-direction: column; }
+.mk-stack .mk-row { border-radius: 0; }
+.mk-gap { position: relative; height: 16px; }
+.mk-gap::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 1px dashed #c7cdf5;
+}
+.mk-gap .mk-plus {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  box-shadow: 0 0 0 3px #fafbfc;
+}
+
+/* Botón de la acción, separado de las filas */
+.mk-action { padding: 10px 12px; }
+
+/* Tabla de ejemplo: columnas unidas */
+.mk-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.mk-grid-4 { grid-template-columns: 44px 70px 40px 1fr; }
+.mk-gh {
+  background: #fafbfc;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  padding: 0.5rem 0.7rem;
+  border-bottom: 1px solid var(--line);
+}
+.mk-gh + .mk-gh { border-left: 1px solid var(--line); }
+.mk-gc {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 0.55rem 0.7rem;
+  font-size: 13px;
+  border-bottom: 1px solid #f0f1f5;
+}
+.mk-gc + .mk-gc { border-left: 1px solid #f0f1f5; }
+.mk-gc.mk-center { justify-content: center; }
+.mk-gc .copy-btn {
+  position: static;
+  transform: none;
+  opacity: 1;
+  flex: none;
+  margin-left: auto;
+}
+.mk-txt {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mk-url { color: var(--muted); font-size: 12px; }
+.mk-utm { color: #c2410c; font-weight: 700; font-size: 12px; white-space: nowrap; }
+
+/* Estados de las imágenes */
+.mk-tiles { display: flex; gap: 12px; }
+.mk-tilecol { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.mk-tilecol .img-tile { width: 100%; height: 120px; flex: none; }
+.mk-tilecol .mk-caption { margin: 0; }
+.mk-ph {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #8b93b5;
+  background: linear-gradient(135deg, #e8ecf8, #f3f0ff);
+}
+.img-tile.off .mk-ph {
+  filter: grayscale(1) brightness(0.55);
+  opacity: 0.7;
+  background: #111;
+}
+
+/* Modo selección de fotos */
+.mk-photo { padding: 0; overflow: hidden; background: #fff; }
+.mk-photo-head {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.7rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+.mk-photo-body { display: grid; grid-template-columns: 130px 1fr; min-height: 170px; }
+.mk-photo-list { border-right: 1px solid var(--line); display: flex; flex-direction: column; }
+.mk-pl {
+  padding: 0.4rem 0.6rem;
+  font-size: 12px;
+  color: var(--muted);
+  border-bottom: 1px solid #f0f1f5;
+}
+.mk-pl.on { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.mk-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-content: start;
+  gap: 8px;
+  padding: 0.6rem;
+}
+.mk-photo-grid .img-tile { height: 110px; }
+.mk-photo-hint {
+  padding: 0.4rem 0.7rem;
+  font-size: 11px;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+}
+
+/* Ventana de exportación */
+.mk-modal { padding: 0; overflow: hidden; background: #fff; }
+.mk-modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+.mk-modal-sec { padding: 0.8rem 1rem; }
+.mk-modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.7rem 1rem;
+  border-top: 1px solid var(--line);
+}
