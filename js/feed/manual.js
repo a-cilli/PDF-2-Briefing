@@ -1,6 +1,7 @@
 import { API } from '../config.js';
 import { state, requestRender } from '../state.js';
 import { setStatus } from '../ui/toast.js';
+import { setFeedImages } from '../ui/images.js';
 
 const btn = document.getElementById('checkManual');
 const BTN_LABEL = 'Buscar manuales en feed';
@@ -17,6 +18,7 @@ export function resetManualCheck(r) {
   r.feedId = null;
   r.feedTitle = null;
   r.feedVia = null;
+  setFeedImages(r, []);
 }
 
 async function queryManual(items) {
@@ -53,12 +55,14 @@ async function checkManualRows() {
         r.feedTitle = hit.title;
         r.feedVia = hit.via;
         if (hit.link) r.url = hit.link;
+        setFeedImages(r, hit.images);
         found++;
       } else {
         r.feedCheck = 'missing';
         r.feedId = null;
         r.feedTitle = null;
         r.feedVia = null;
+        setFeedImages(r, []);
         missing++;
       }
     }

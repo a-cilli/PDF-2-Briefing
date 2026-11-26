@@ -1,4 +1,9 @@
-import json, re, threading, time, urllib.request, traceback
+import json
+import re
+import threading
+import time
+import traceback
+import urllib.request
 import xml.etree.ElementTree as ET
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 
@@ -13,7 +18,7 @@ ID_RE = re.compile(r"^[A-Za-z]{2}-(\d{6})\d(?:-\d+)?$")
 
 # Entradas manuales
 CODE_ONLY_RE = re.compile(r"^\d{6}$")                       # 421804
-FULL_ID_RE = re.compile(r"^[A-Za-z]{2}-\d{7}(?:-\d+)?$")    # pm-4218043 (tal cual)
+FULL_ID_RE = re.compile(r"^[A-Za-z]{2}-\d{7}(?:-\d+)?$")    # pm-4218043
 
 state = {"loaded": False, "entries": 0, "updated": None, "error": None}
 tables = {"sku": {}, "id": {}, "full": {}}
@@ -53,8 +58,21 @@ def load_feed():
             n += 1
             fid = (elem.findtext(G + "id") or "").strip()
             sku = (elem.findtext(G + "sku") or "").strip()
-            rec = {"id": fid, "title": (elem.findtext(G + "title") or "").strip(),
-                   "link": (elem.findtext(G + "link") or "").strip()}
+
+            # Todas las imágenes del producto: la principal y las adicionales, sin repetir.
+            images = []
+            for tag in (G + "image_link", G + "additional_image_link"):
+                for el in elem.findall(tag):
+                    u = (el.text or "").strip()
+                    if u and u not in images:
+                        images.append(u)
+
+            rec = {
+                "id": fid,
+                "title": (elem.findtext(G + "title") or "").strip(),
+                "link": (elem.findtext(G + "link") or "").strip(),
+                "images": images,
+            }
 
             # Índice completo: cualquier g:id, para búsquedas de ID exacto.
             if fid:

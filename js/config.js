@@ -26,11 +26,13 @@ export const THUMB_WIDTH = 1000;
 export const SIDEBAR_MIN = 180;
 export const SIDEBAR_MAX = 700;
 
-// Tabla: número de columnas (para las líneas divisorias)
-export const COLS = 10;
+// Tabla: número de columnas
+export const COLS = 11;
 
-// Columnas de la tabla, en el orden de la cabecera. Sirven para mostrar u ocultar columnas.
+// Columnas de la tabla, en el orden de la cabecera.
+// "imgs" es la pestaña de imágenes pegada a la izquierda; siempre visible.
 export const COLUMNS = [
+  { key: 'imgs',        label: '' },
   { key: 'activo',      label: 'Activo' },
   { key: 'idx',         label: '#' },
   { key: 'sku',         label: 'SKU' },
@@ -45,6 +47,7 @@ export const COLUMNS = [
 
 // Columnas de ancho fijo (px).
 export const FIXED_COLS = {
+  imgs: 40,
   activo: 56,
   idx: 72,
   sku: 88,

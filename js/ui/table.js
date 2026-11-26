@@ -1,16 +1,22 @@
 import { tbody, openExportBtn } from './dom.js';
 import { state } from '../state.js';
-import { COLS, COLUMNS, FIXED_COLS, FLEX_COLS, FLEX_MIN_PX } from '../config.js';
+import { COLUMNS, FIXED_COLS, FLEX_COLS, FLEX_MIN_PX } from '../config.js';
 import { cell, fmt, isSoloSku, utmSuffix } from '../utils.js';
 import { FILTERS, renderSummary } from './filters.js';
 import { focusRow } from './preview.js';
 import { makeEditable } from './editable.js';
 import { withCopy } from './copy.js';
 import { syncManualButton, resetManualCheck } from '../feed/manual.js';
+import { imgButtonCell, imageSubRow, syncImagesCart } from './images.js';
 
 const TRASH_SVG = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
   <path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/><path d="M10 11v6M14 11v6"/>
 </svg>`;
+
+// Número de columnas visibles. Las filas especiales lo usan para ocupar todo el ancho.
+function visibleSpan() {
+  return COLUMNS.filter(c => !state.hiddenCols.has(c.key)).length;
+}
 
 // Fila manual nueva, con la página de la fila de referencia.
 function newManualRow(after) {
@@ -24,6 +30,8 @@ function newManualRow(after) {
     feedId: null, feedTitle: null, feedVia: null, feedError: null,
     title: 'n/a', titleFound: false,
     url: '',
+    images: [],
+    imgOpen: false,
     originalPrice: null, currentPrice: null, cashPrice: null, biweekly: null,
     flags: ['manual'],
     pages: [page],
@@ -34,13 +42,16 @@ function newManualRow(after) {
 }
 
 // Línea divisora entre filas. Clic = inserta una fila manual justo debajo de "after".
-function gapRow(after) {
+// Línea divisora entre filas. Clic = inserta una fila manual justo debajo de "after".
+// Si "locked" es true (la fila de arriba tiene imágenes abiertas), no crea filas.
+function gapRow(after, span, locked = false) {
   const tr = document.createElement('tr');
-  tr.className = 'gap';
-  tr.title = 'Clic para añadir una fila manual aquí';
+  tr.className = 'gap' + (locked ? ' locked' : '');
+  tr.title = locked ? 'Cierra las imágenes para añadir filas aquí' : 'Clic para añadir una fila manual aquí';
   const td = document.createElement('td');
-  td.colSpan = COLS;
+  td.colSpan = span;
   tr.appendChild(td);
+  if (locked) return tr;
 
   tr.addEventListener('click', () => {
     const created = newManualRow(after);
@@ -177,6 +188,7 @@ function buildRow(r, i) {
   }
 
   tr.append(
+    imgButtonCell(r),
     actTd,
     idxTd,
     skuTd,
@@ -198,8 +210,7 @@ function buildRow(r, i) {
 // 2. Las flexibles reparten el resto según FLEX_COLS, con mínimo FLEX_MIN_PX.
 // 3. La suma es igual al ancho del contenedor, así la tabla siempre lo llena.
 //    Si los mínimos no caben, la tabla se hace más ancha y aparece scroll horizontal.
-// La <colgroup> se reconstruye solo con las columnas visibles, para que cada
-// ancho quede en su columna real (las ocultas no ocupan lugar en la tabla).
+// La <colgroup> se reconstruye solo con las columnas visibles.
 function layoutColumns() {
   const table = tbody.closest('table');
   const scroll = table.parentElement;
@@ -246,7 +257,7 @@ function layoutColumns() {
     th.hidden = state.hiddenCols.has(COLUMNS[i].key);
   });
   tbody.querySelectorAll('tr').forEach(tr => {
-    if (tr.classList.contains('gap') || tr.classList.contains('empty-row')) return;
+    if (tr.classList.contains('gap') || tr.classList.contains('empty-row') || tr.classList.contains('img-row')) return;
     [...tr.children].forEach((td, i) => {
       td.hidden = state.hiddenCols.has(COLUMNS[i].key);
     });
@@ -262,10 +273,12 @@ export function initTableLayout() {
 /* ---------------- Tabla ---------------- */
 
 // Dibuja la tabla completa según el filtro activo.
+// Dibuja la tabla completa según el filtro activo.
 export function renderTable() {
   tbody.replaceChildren();
   state.pendingCell = null;
 
+  const span = visibleSpan();
   const keep = FILTERS[state.activeFilter];
   const filtered = state.activeFilter !== 'all';
 
@@ -274,6 +287,7 @@ export function renderTable() {
   let pageIdx = -1;
   let rowInPage = 0;
   let shown = 0;
+  let lastOpen = false;   // ¿la última fila dibujada tiene imágenes abiertas?
 
   state.rows.forEach((r, i) => {
     if (!r.manual) {
@@ -289,18 +303,21 @@ export function renderTable() {
 
     if (!keep(r)) return;
     // Con filtro activo no hay líneas "+", para no insertar filas en una vista incompleta.
-    if (!filtered) tbody.appendChild(gapRow(i - 1));
+    if (!filtered) tbody.appendChild(gapRow(i - 1, span, lastOpen));
     tbody.appendChild(buildRow(r, i));
+    // La fila de imágenes va justo debajo de su producto y no tiene número.
+    if (r.imgOpen) tbody.appendChild(imageSubRow(r, span));
+    lastOpen = Boolean(r.imgOpen);
     shown++;
   });
 
-  if (!filtered) tbody.appendChild(gapRow(state.rows.length - 1));
+  if (!filtered) tbody.appendChild(gapRow(state.rows.length - 1, span, lastOpen));
 
   if (!shown) {
     const tr = document.createElement('tr');
     tr.className = 'empty-row';
     const td = document.createElement('td');
-    td.colSpan = COLS;
+    td.colSpan = span;
     td.textContent = 'Ninguna fila coincide con este filtro.';
     tr.appendChild(td);
     tbody.appendChild(tr);
@@ -309,6 +326,7 @@ export function renderTable() {
   layoutColumns();
   renderSummary(shown);
   syncManualButton();
+  syncImagesCart();
   openExportBtn.disabled = state.rows.length === 0;
 
   // Una fila manual recién creada abre su celda SKU para escribir.

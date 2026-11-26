@@ -77,10 +77,24 @@
             <span class="tools-label">Filas</span>
             <div class="chips" id="summary"></div>
           </div>
+
           <div class="tools-line">
             <span class="tools-label">Columnas en tabla</span>
             <div class="col-toggles" id="viewChecks"></div>
             <button id="showAllCols" class="link-btn" type="button">Mostrar todas</button>
+          </div>
+
+          <div class="tools-line tools-images">
+            <span class="tools-label">Imágenes</span>
+            <div class="img-cart">
+              <span id="imgCount" class="img-count">0 de 0 imágenes</span>
+              <button id="imgAll" class="btn sm" type="button" disabled>Activar todas</button>
+              <button id="imgNone" class="btn sm" type="button" disabled>Desactivar todas</button>
+              <button id="imgFirst" class="btn sm" type="button" disabled>Solo la 1ª</button>
+              <button id="imgSecond" class="btn sm" type="button" disabled>Solo la 2ª</button>
+              <button id="imgZip" class="btn sm primary" type="button" disabled>Capturar y descargar ZIP</button>
+            </div>
+            <button id="photoMode" class="btn sm" type="button" disabled>Modo selección de fotos</button>
           </div>
         </div>
 
@@ -98,6 +112,7 @@
           <div class="table-scroll">
             <table>
               <colgroup>
+                <col class="c-imgs" />
                 <col class="c-activo" />
                 <col class="c-idx" />
                 <col class="c-sku" />
@@ -111,6 +126,7 @@
               </colgroup>
               <thead>
                 <tr>
+                  <th class="th-img"></th>
                   <th>Activo</th>
                   <th>#</th>
                   <th>SKU</th>
@@ -130,7 +146,7 @@
       </div>
     </section>
 
-    <!-- Modal: solo columnas del Excel y descarga -->
+    <!-- Modal: columnas del Excel y descarga -->
     <div id="exportModal" class="modal" hidden>
       <div class="modal-backdrop" data-close></div>
       <div class="modal-card card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -164,6 +180,38 @@
         <footer class="modal-foot">
           <button type="button" id="dlExcel" class="btn primary">Descargar Excel</button>
         </footer>
+      </div>
+    </div>
+
+    <!-- Modo selección de fotos -->
+    <div id="photoModal" class="photo-overlay" hidden>
+      <div class="photo-card" role="dialog" aria-modal="true" aria-label="Modo selección de fotos">
+        <header class="photo-head">
+          <div class="photo-title">
+            <strong id="photoTitle"></strong>
+            <span id="photoCounter" class="photo-counter"></span>
+          </div>
+          <div class="photo-nav">
+            <button id="photoPrev" class="btn sm" type="button">← Anterior</button>
+            <button id="photoNext" class="btn sm" type="button">Siguiente →</button>
+            <button id="photoClose" class="icon-btn" type="button" aria-label="Cerrar">×</button>
+          </div>
+        </header>
+
+        <div class="photo-body">
+          <aside class="photo-table-box" id="photoTableBox"></aside>
+
+          <section class="photo-main">
+            <div class="photo-bulk">
+              <button id="photoAll" class="btn sm" type="button">Activar todas</button>
+              <button id="photoNone" class="btn sm" type="button">Desactivar todas</button>
+              <button id="photoFirst" class="btn sm" type="button">Solo la 1ª</button>
+              <button id="photoSecond" class="btn sm" type="button">Solo la 2ª</button>
+              <span class="photo-hint">← → cambiar producto · 1-9 activar o desactivar imagen · Esc cerrar</span>
+            </div>
+            <div id="photoGrid" class="photo-grid"></div>
+          </section>
+        </div>
       </div>
     </div>
 

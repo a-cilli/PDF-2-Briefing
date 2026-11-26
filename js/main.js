@@ -10,6 +10,7 @@ import { initUtm } from './ui/utm.js';
 import { initColumns } from './ui/columns.js';
 import { initModal } from './ui/modal.js';
 import { initToolsToggle } from './ui/toolbar.js';
+import { initImages } from './ui/images.js';
 
 // Registra el render de la tabla para que los demás módulos puedan pedirlo.
 hooks.render = renderTable;
@@ -23,4 +24,5 @@ initColumns();
 initModal();
 initToolsToggle();
 initTableLayout();
+initImages();
 startFeedStatus();
