@@ -3,12 +3,13 @@ import { state } from '../state.js';
 import { readPdf } from '../pdf/reader.js';
 import { extract } from '../pdf/card.js';
 import { enrichFromFeed } from '../feed/lookup.js';
+import { waitForFeed } from '../feed/status.js';
 import { setStatus } from './toast.js';
 import { showWorkspace, setBusy, showUploadError } from './views.js';
 import { renderSidebar } from './preview.js';
 import { renderTable } from './table.js';
 
-// Lee el PDF, busca códigos y títulos, consulta el feed y muestra el espacio de trabajo.
+// Lee el PDF, busca códigos y títulos, espera el feed y muestra el espacio de trabajo.
 export async function handleFile(file) {
   if (!file) return;
   if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') {
@@ -34,11 +35,17 @@ export async function handleFile(file) {
     });
     renderSidebar(doc, state.rows);
 
-    progressText.textContent = 'Consultando feed local…';
+    // La tabla no se muestra hasta que el feed esté listo.
+    progressText.textContent = 'PDF listo. Esperando el feed…';
     try {
+      await waitForFeed(msg => (progressText.textContent = msg));
+
+      progressText.textContent = 'Consultando feed local…';
       await enrichFromFeed(state.rows);
       setStatus(`${doc.numPages} páginas · ${result.hitCount} códigos encontrados.`);
     } catch (feedErr) {
+      // Sin feed utilizable: las filas se muestran marcadas con el error.
+      state.rows.forEach(r => (r.feedError = feedErr.message));
       setStatus(`Sin feed: ${feedErr.message}. Revisa que feed_server.py esté corriendo.`);
       console.error(feedErr);
     }

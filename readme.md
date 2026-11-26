@@ -66,6 +66,11 @@ This extension opens the application in the browser using a local address.
 
 The image capture feature only works in **Google Chrome** and **Microsoft Edge**. Use one of those two to open the application.
 
+#### 6. Git (optional, only to upload the project to GitHub)
+
+1. Go to **git-scm.com/downloads** and install the version for your system with the default options.
+2. Close and reopen VS Code after installing so the terminal recognizes it.
+
 ---
 
 ### Check that Python works
@@ -99,7 +104,7 @@ If you see an error like **"is not recognized as a command"** or **"command not 
 
 1. Download the project folder and extract it somewhere easy to find, such as the Desktop.
 2. Open VS Code.
-3. Go to **File → Open Folder** and select the **briefing-file** folder.
+3. Go to **File → Open Folder** and select the project folder.
 
 You should see these files in the left panel:
 
@@ -135,7 +140,7 @@ python3 feed_server.py
 2. You should see a message like: `Servidor en http://127.0.0.1:8000`.
 3. **Keep this terminal open while you use the application.** If you close it, the application loses its feed data.
 
-The first time, the server takes one or two minutes to load the full feed. Meanwhile, the application works, but it can't match products to the feed.
+The first time, the server takes one or two minutes to load the full feed. You can still upload a PDF during that time. The app reads the PDF and then waits for the feed before showing the table.
 
 To check whether it's ready, open **http://127.0.0.1:8000/status** in your browser. When you see `"loaded": true`, the feed is loaded.
 
@@ -160,7 +165,9 @@ The server only queries the feed. It doesn't download images: images come from w
 
 #### 1. Upload a PDF
 
-Drag the catalog PDF onto the start screen, or click to choose it. The application reads each page, finds the 6-digit codes, and builds the table with their titles and prices.
+Drag the catalog PDF onto the start screen, or click to choose it. The application reads each page and finds the 6-digit codes.
+
+Once the PDF is read, the screen shows **"PDF listo. Esperando el feed…"** (PDF ready, waiting for the feed) until the feed server has loaded. Then the table opens with titles, prices, and feed data. If the server is off, the message changes to **"Esperando el servidor del feed…"** and the app keeps checking every second.
 
 It reads the full PDF on your computer. Nothing is uploaded to a server.
 
@@ -207,6 +214,7 @@ The catalog pages appear on the left. Each code found has a yellow box.
 
 - **Double-click** the title to change it. Enter saves, Escape cancels.
 - **Copy button** appears when you hover over the title or the feed name.
+- **Link button** appears when you hover over the URL. It opens the product page in a new tab, without the query string (everything from `?` onward). The UTM you type in the top field is never included.
 - In manual rows you can also edit the SKU and the page.
 
 #### 6. Add manual products
@@ -321,8 +329,14 @@ Refresh the browser page (F5 or Ctrl + R). You return to the start screen. Data 
 
 ### Frequently asked questions
 
+**The screen says "Esperando el feed…" (Waiting for the feed) and doesn't move.**
+The Python server isn't running or is still loading the feed. Check the terminal and `http://127.0.0.1:8000/status`. If the server reported an error, restart `feed_server.py`.
+
 **The table says "feed no disponible" (feed unavailable).**
 The Python server isn't running or is still loading the feed. Check the terminal and `http://127.0.0.1:8000/status`.
+
+**The command `python` opens the Microsoft Store or says "Python was not found".**
+Windows is using a placeholder for `python`. Use `py feed_server.py` instead. To remove the placeholder, go to **Settings → Apps → Advanced app settings → App execution aliases** and turn off `python.exe` and `python3.exe`.
 
 **The `py` or `python3` command doesn't work.**
 Python wasn't installed correctly or the PATH option wasn't checked. Uninstall it, reinstall it, and check that option.
@@ -357,7 +371,9 @@ As noted at the start, this project is provided without official support. If you
 - **Colors and styles:** `styles.css`
 - **Column widths:** `js/config.js`, in `FIXED_COLS` and `FLEX_MIN_PX`
 - **Table logic:** `js/ui/table.js`
+- **Copy and link buttons:** `js/ui/buttons.js`
 - **Images, photo selection mode, and ZIP capture:** `js/ui/images.js`
+- **Upload flow and waiting for the feed:** `js/ui/upload.js` and `js/feed/status.js`
 - **PDF reading:** `js/pdf/`
 - **Feed lookup:** `feed_server.py`
 
@@ -431,6 +447,11 @@ Es una extensión que abre la aplicación en el navegador con una dirección loc
 
 La captura de imágenes usa una función que solo está disponible en **Google Chrome** y **Microsoft Edge**. Usa uno de esos dos para abrir la aplicación.
 
+#### 6. Git (opcional, solo para subir el proyecto a GitHub)
+
+1. Entra a **git-scm.com/downloads** e instala la versión para tu sistema con las opciones por defecto.
+2. Cierra y vuelve a abrir VS Code después de instalarlo, para que la terminal lo reconozca.
+
 ---
 
 ### Comprobar que Python funciona
@@ -464,7 +485,7 @@ Si aparece un error del tipo **"no se reconoce como un comando"** o **"command n
 
 1. Descarga la carpeta del proyecto y descomprímela en un lugar fácil de encontrar, por ejemplo el Escritorio.
 2. Abre VS Code.
-3. Ve a **File → Open Folder** (Archivo → Abrir carpeta) y selecciona la carpeta **briefing-file**.
+3. Ve a **File → Open Folder** (Archivo → Abrir carpeta) y selecciona la carpeta del proyecto.
 
 Deberás ver estos archivos en el panel izquierdo:
 
@@ -500,7 +521,7 @@ python3 feed_server.py
 2. Debe aparecer un mensaje parecido a: `Servidor en http://127.0.0.1:8000`.
 3. **Deja esta terminal abierta mientras uses la aplicación.** Si la cierras, la aplicación deja de tener datos del feed.
 
-La primera vez, el servidor tarda uno o dos minutos en cargar el feed completo. Mientras tanto, la aplicación funciona, pero no puede cruzar productos con el feed.
+La primera vez, el servidor tarda uno o dos minutos en cargar el feed completo. Mientras tanto puedes subir un PDF: la aplicación lo lee y luego espera el feed antes de mostrar la tabla.
 
 Para saber si ya está listo, abre en tu navegador: **http://127.0.0.1:8000/status**. Cuando aparezca `"loaded": true`, el feed está cargado.
 
@@ -525,7 +546,9 @@ El servidor solo consulta el feed. No descarga imágenes: las imágenes se toman
 
 #### 1. Subir un PDF
 
-Arrastra el PDF del catálogo a la pantalla de inicio, o haz clic para elegirlo. La aplicación lee cada página, busca los códigos de 6 dígitos y arma la tabla con sus títulos y precios.
+Arrastra el PDF del catálogo a la pantalla de inicio, o haz clic para elegirlo. La aplicación lee cada página y busca los códigos de 6 dígitos.
+
+Cuando termina de leer el PDF, la pantalla muestra **"PDF listo. Esperando el feed…"** hasta que el servidor del feed termine de cargar. Luego aparece la tabla con títulos, precios y datos del feed. Si el servidor está apagado, el mensaje cambia a **"Esperando el servidor del feed…"** y la aplicación sigue revisando cada segundo.
 
 Lee el PDF completo en tu computadora. No se sube a ningún servidor.
 
@@ -572,6 +595,7 @@ A la izquierda aparecen las páginas del catálogo. Cada código encontrado tien
 
 - **Doble clic** en el título para cambiarlo. Enter guarda, Escape cancela.
 - **Botón de copiar** que aparece al pasar el mouse sobre el título o el nombre del feed.
+- **Botón de enlace** que aparece al pasar el mouse sobre la URL. Abre la página del producto en una pestaña nueva, sin el querystring (todo lo que va desde `?`). El UTM que escribas en el campo de arriba nunca se incluye.
 - En los productos manuales puedes editar también el SKU y la página.
 
 #### 6. Agregar productos manuales
@@ -686,8 +710,14 @@ Actualiza la página del navegador (F5 o Ctrl + R). Vuelves a la pantalla de ini
 
 ### Preguntas frecuentes
 
+**La pantalla dice "Esperando el feed…" y no cambia.**
+El servidor de Python no está corriendo o todavía está cargando el feed. Revisa la terminal y `http://127.0.0.1:8000/status`. Si el servidor reportó un error, reinicia `feed_server.py`.
+
 **La tabla dice "feed no disponible".**
 El servidor de Python no está corriendo o todavía está cargando el feed. Revisa la terminal y `http://127.0.0.1:8000/status`.
+
+**El comando `python` abre la Microsoft Store o dice "Python was not found".**
+Windows está usando un atajo para `python`. Usa `py feed_server.py` en su lugar. Para quitar el atajo, ve a **Configuración → Aplicaciones → Configuración avanzada de aplicaciones → Alias de ejecución de aplicaciones** y desactiva `python.exe` y `python3.exe`.
 
 **El comando `py` o `python3` no funciona.**
 Python no se instaló bien o no se marcó la opción PATH. Desinstálalo, vuelve a instalarlo y marca esa casilla.
@@ -722,7 +752,9 @@ Como se indicó al inicio, este proyecto se entrega sin soporte oficial. Si quie
 - **Colores y estilos:** `styles.css`
 - **Anchos de columna:** `js/config.js`, en `FIXED_COLS` y `FLEX_MIN_PX`
 - **Lógica de la tabla:** `js/ui/table.js`
+- **Botones de copiar y de enlace:** `js/ui/buttons.js`
 - **Imágenes, modo selección y captura en ZIP:** `js/ui/images.js`
+- **Flujo de subida y espera del feed:** `js/ui/upload.js` y `js/feed/status.js`
 - **Lectura del PDF:** `js/pdf/`
 - **Consulta del feed:** `feed_server.py`
 

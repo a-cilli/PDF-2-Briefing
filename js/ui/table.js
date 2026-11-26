@@ -5,7 +5,7 @@ import { cell, fmt, isSoloSku, utmSuffix } from '../utils.js';
 import { FILTERS, renderSummary } from './filters.js';
 import { focusRow } from './preview.js';
 import { makeEditable } from './editable.js';
-import { withCopy } from './copy.js';
+import { withCopy, withOpenLink } from './buttons.js';
 import { syncManualButton, resetManualCheck } from '../feed/manual.js';
 import { imgButtonCell, imageSubRow, syncImagesCart } from './images.js';
 
@@ -41,7 +41,6 @@ function newManualRow(after) {
   };
 }
 
-// Línea divisora entre filas. Clic = inserta una fila manual justo debajo de "after".
 // Línea divisora entre filas. Clic = inserta una fila manual justo debajo de "after".
 // Si "locked" es true (la fila de arriba tiene imágenes abiertas), no crea filas.
 function gapRow(after, span, locked = false) {
@@ -96,6 +95,7 @@ function feedNameCell(r) {
 }
 
 // URL editable. El UTM se muestra al final en otro color con CSS (data-utm).
+// El botón de enlace abre la URL sin querystring en una pestaña nueva.
 function urlCell(r) {
   const td = cell(r.url || '', 'url-cell');
   td.dataset.utm = utmSuffix(r.url, state.utm);
@@ -103,7 +103,7 @@ function urlCell(r) {
     r.url = v;
     renderTable();
   });
-  return td;
+  return withOpenLink(td, () => r.url);
 }
 
 // Construye una fila de la tabla. El orden de las celdas coincide con COLUMNS.
@@ -272,7 +272,6 @@ export function initTableLayout() {
 
 /* ---------------- Tabla ---------------- */
 
-// Dibuja la tabla completa según el filtro activo.
 // Dibuja la tabla completa según el filtro activo.
 export function renderTable() {
   tbody.replaceChildren();

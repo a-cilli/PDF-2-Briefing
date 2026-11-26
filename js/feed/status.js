@@ -39,3 +39,23 @@ async function checkFeedServer() {
 export function startFeedStatus() {
   checkFeedServer();
 }
+
+// Espera hasta que el feed esté cargado. Llama onWait con un mensaje mientras espera.
+// Rechaza si el servidor reporta un error de carga.
+export function waitForFeed(onWait) {
+  return new Promise((resolve, reject) => {
+    const poll = async () => {
+      try {
+        const res = await fetch(FEED_STATUS_URL, { cache: 'no-store' });
+        const s = await res.json();
+        if (s.loaded) return resolve(s);
+        if (s.error) return reject(new Error(s.error));
+        onWait('PDF listo. Esperando el feed…');
+      } catch {
+        onWait('PDF listo. Esperando el servidor del feed…');
+      }
+      setTimeout(poll, 1000);
+    };
+    poll();
+  });
+}
