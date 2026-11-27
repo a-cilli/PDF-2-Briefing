@@ -11,10 +11,9 @@ import { initModal } from './ui/modal.js';
 import { initToolsToggle } from './ui/toolbar.js';
 import { initImages } from './ui/images.js';
 import { initHelp } from './ui/help.js';
-
+import { initQuick } from './ui/quick.js';
 
 hooks.render = renderTable;
-
 
 initHelp();
 initUpload();
@@ -27,4 +26,5 @@ initModal();
 initToolsToggle();
 initTableLayout();
 initImages();
+initQuick();
 startFeedStatus();

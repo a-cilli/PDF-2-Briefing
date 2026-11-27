@@ -115,6 +115,7 @@ button { font: inherit; cursor: pointer; }
   justify-content: center;
   padding: 2rem;
   gap: 1.5rem;
+  position: relative;
 }
 .brand { text-align: center; }
 .brand h1 { margin: 0; font-size: 1.7rem; letter-spacing: -0.02em; }
@@ -720,6 +721,14 @@ tr.manual.manual-found:not(.inactive) td.act { box-shadow: inset 4px 0 0 #0f9b8e
 tr.manual.manual-missing:not(.inactive) td { background: #ffe9e4 !important; }
 tr.manual.manual-missing:not(.inactive) td.act { box-shadow: inset 4px 0 0 #e8553d; }
 
+/* Multimatch sin elegir: naranja suave, con barra naranja a la izquierda */
+tr.multi-pending-row:not(.inactive) td { background: #fff4ea !important; }
+tr.multi-pending-row:not(.inactive) td.act { box-shadow: inset 4px 0 0 #e8893a; }
+
+/* Multimatch elegido: azul suave, con barra azul a la izquierda */
+tr.multi-picked-row:not(.inactive) td { background: #eef9ff !important; }
+tr.multi-picked-row:not(.inactive) td.act { box-shadow: inset 4px 0 0 #0284c7; }
+
 /* Fila inactiva: gris, tachada. Va al final. */
 tr.inactive td {
   background: #f3f4f6 !important;
@@ -1163,13 +1172,16 @@ tr.gap.locked:hover td {
   place-items: center;
 }
 
-/* En la pantalla de inicio, el botón va en la esquina superior derecha */
-.upload-view { position: relative; }
-.upload-help {
+/* Grupo de botones de la pantalla de inicio (Revisar ID y ?), arriba a la derecha */
+.upload-tools {
   position: absolute;
   top: 1rem;
   right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
+.feed-check-link { text-decoration: none; color: var(--ink); }
 
 /* Modal de ayuda */
 #helpModal { z-index: 70; }
@@ -1364,7 +1376,7 @@ tr.gap.locked:hover td {
   background: #111;
 }
 
-/* Modo selección de fotos */
+/* Modo selección de fotos (maqueta) */
 .mk-photo { padding: 0; overflow: hidden; background: #fff; }
 .mk-photo-head {
   display: flex;
@@ -1397,7 +1409,7 @@ tr.gap.locked:hover td {
   border-top: 1px solid var(--line);
 }
 
-/* Ventana de exportación */
+/* Ventana de exportación (maqueta) */
 .mk-modal { padding: 0; overflow: hidden; background: #fff; }
 .mk-modal-head {
   display: flex;
@@ -1413,4 +1425,251 @@ tr.gap.locked:hover td {
   justify-content: flex-end;
   padding: 0.7rem 1rem;
   border-top: 1px solid var(--line);
+}
+
+/* =====================================================================
+   16. MULTIMATCH: filtros, mini tabla desplegable y chips
+   ===================================================================== */
+
+.chip.multi-pending { background: #fff1e6; border-color: #f5c28f; color: #9a4a0a; }
+.chip.multi-picked { background: #e0f2fe; border-color: #7dd3fc; color: #075985; }
+.chip.filterable.on.multi-pending { background: #fff1e6; color: #9a4a0a; border-color: #e8893a; box-shadow: 0 0 0 2px #fbd9b5; }
+.chip.filterable.on.multi-picked { background: #e0f2fe; color: #075985; border-color: #0284c7; box-shadow: 0 0 0 2px #bae6fd; }
+
+/* Botón "Elegir (N)" en la celda de ID */
+.multi-pick {
+  border: 1px dashed #f5c28f;
+  background: #fff1e6;
+  color: #9a4a0a;
+  border-radius: 999px;
+  padding: 2px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.multi-pick:hover { border-style: solid; }
+
+/* Botón de cambiar, más a la izquierda cuando la celda también tiene copiar */
+.copy-btn.change-btn { right: 6px; }
+
+/* Fila desplegable: mini tabla con el dato del PDF y los candidatos */
+tr.multi-row td {
+  background: #fbfcff;
+  padding: 0.6rem 0.75rem 0.7rem;
+  border-bottom: 1px solid var(--line);
+}
+.multi-box {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+.multi-pdf {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.5rem 0.7rem;
+  background: #fafbfc;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+.multi-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.multi-code { color: var(--ink); }
+.multi-ptitle { color: var(--muted); overflow-wrap: anywhere; }
+
+.multi-grid {
+  display: grid;
+  grid-template-columns: 84px 170px 1fr 36px 52px;
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.45rem 0.7rem;
+  border-bottom: 1px solid #f0f1f5;
+  font-size: 12px;
+}
+.multi-grid:last-child { border-bottom: none; }
+.multi-grid.multi-head {
+  padding: 0.4rem 0.7rem;
+  background: #fafbfc;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.multi-grid.on { background: #eef0ff; }
+.multi-id { overflow-wrap: anywhere; }
+.multi-grid.on .multi-id { color: var(--accent); }
+.multi-title { overflow-wrap: anywhere; }
+.multi-num {
+  text-align: center;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 6px;
+  padding: 1px 0;
+}
+.multi-grid.on .multi-num { background: #fff; }
+
+/* =====================================================================
+   17. SELECCIÓN DE MULTIMATCH: modal de dos tablas
+   ===================================================================== */
+
+.qs-card {
+  width: min(1400px, calc(100vw - 2rem));
+  height: min(860px, calc(100vh - 2rem));
+  max-height: calc(100vh - 2rem);
+  display: flex;
+  flex-direction: column;
+}
+.qs-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.7rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+  background: #fafbfc;
+}
+.qs-hint { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+.qs-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 300px 1fr;
+}
+
+/* Columna izquierda: todas las filas con multimatch */
+.qs-side {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--line);
+}
+.qs-side-head { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--line); }
+.qs-side-list { flex: 1; overflow: auto; padding: 0.4rem; display: flex; flex-direction: column; gap: 4px; }
+.qs-side-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 0.5rem;
+  text-align: left;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  font: inherit;
+  color: inherit;
+}
+.qs-side-item:hover { border-color: #c7cdf5; }
+.qs-side-item.cur { background: var(--accent-soft); border-color: #c7cdf5; }
+.qs-side-item:disabled { opacity: 0.5; cursor: default; }
+.qs-side-sku { font-weight: 700; font-size: 12px; }
+.qs-side-title {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.qs-tag {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 1px 7px;
+  border-radius: 999px;
+  align-self: center;
+}
+.qs-tag.todo { background: #fff1e6; color: #9a4a0a; }
+.qs-tag.ok { background: #e0f2fe; color: #075985; }
+
+/* Columna central: dos tablas */
+.qs-main {
+  min-height: 0;
+  overflow: auto;
+  padding: 0.9rem 1.25rem;
+}
+.qs-h {
+  margin: 0.4rem 0 0.4rem;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.qs-h:first-of-type { margin-top: 0; }
+.qs-count { text-transform: none; letter-spacing: 0; font-weight: 600; margin-left: 0.4rem; }
+.qs-empty { margin: 0 0 0.6rem; color: var(--muted); font-style: italic; }
+
+.qs-tbl-wrap {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.qs-tbl { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: auto; }
+.qs-tbl th {
+  text-align: left;
+  background: #fafbfc;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--line);
+}
+.qs-tbl td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #f0f1f5;
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+.qs-tbl td:nth-child(2) { white-space: nowrap; }
+.qs-tbl td:nth-child(4) { white-space: nowrap; }
+.qs-tbl tr:last-child td { border-bottom: none; }
+.qs-tbl tr { cursor: pointer; }
+.qs-tbl tbody tr:hover td { background: #f7f9ff; }
+.qs-tbl tbody tr.sel td { background: var(--accent-soft); }
+.qs-tbl tbody tr.picked td { box-shadow: inset 4px 0 0 #0284c7; }
+.qs-tbl tbody tr.sel.picked td { background: #e0f2fe; }
+.qs-strong { font-weight: 700; }
+.qs-num-cell { width: 44px; text-align: center; font-weight: 700; color: var(--accent); }
+.qs-act { width: 110px; text-align: right; }
+.qs-act .btn { min-width: 84px; }
+
+/* =====================================================================
+   18. SELECCIÓN DE MULTIMATCH: badges de filtro y resaltado de SKU
+   ===================================================================== */
+
+.qs-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.qs-badge {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: 0.15s;
+}
+.qs-badge[aria-pressed="false"] { opacity: 0.55; }
+.qs-badge.pending[aria-pressed="true"] { background: #fff1e6; border-color: #f5c28f; color: #9a4a0a; }
+.qs-badge.picked[aria-pressed="true"] { background: #e0f2fe; border-color: #7dd3fc; color: #075985; }
+
+.qs-hl {
+  background: #fde68a;
+  color: inherit;
+  border-radius: 3px;
+  padding: 0 1px;
 }

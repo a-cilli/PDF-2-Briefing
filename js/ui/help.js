@@ -11,6 +11,7 @@ const UI = {
 const ICON_ATTR = 'width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
 const COPY_ICON = `<svg ${ICON_ATTR}><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
 const LINK_ICON = `<svg ${ICON_ATTR}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
+const CHANGE_ICON = `<svg ${ICON_ATTR}><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>`;
 const IMG_ICON = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>`;
 const PICTURE_PH = `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>`;
 
@@ -31,6 +32,8 @@ const visRows = () => `
   <div class="mock">
     <div class="mk-row mk-yellow"><input type="checkbox" checked tabindex="-1" /><span>421804</span><span class="mk-muted">Sin título</span></div>
     <div class="mk-row mk-red"><input type="checkbox" checked tabindex="-1" /><span>409062</span><span class="mk-muted">Solo código</span></div>
+    <div class="mk-row" style="background:#fff4ea"><input type="checkbox" checked tabindex="-1" /><span>409062</span><span class="mk-muted">Multimatch sin elegir</span></div>
+    <div class="mk-row" style="background:#eef9ff"><input type="checkbox" checked tabindex="-1" /><span>445433</span><span>Sala esquinera Venice</span></div>
     <div class="mk-row mk-lila"><input type="checkbox" checked tabindex="-1" /><span>pm-4218043</span><span>Sofá Naomi</span></div>
     <div class="mk-row mk-gray"><input type="checkbox" tabindex="-1" /><span>389514</span><span>Desactivada</span></div>
   </div>`;
@@ -45,25 +48,52 @@ const visManual = lang => `
   </div>
   <div class="mk-caption">${T(lang, 'Tools → Search manual rows in feed', 'Herramientas → Buscar manuales en feed')}</div>
   <div class="mock mk-action">
-    <span class="btn" style="display: inline-block;width: max-content;" tabindex="-1">Buscar manuales en feed</span>
+    <span class="btn" tabindex="-1">Buscar manuales en feed</span>
   </div>`;
 
-const visLinks = lang => `
+const visMulti = lang => `
   <div class="mock">
-    <div class="mk-grid">
-      <div class="mk-gh">Título</div>
-      <div class="mk-gh">URL</div>
-      <div class="mk-gc">
-        <span class="mk-txt">Sofá Naomi</span>
-        <button class="copy-btn" tabindex="-1" type="button">${COPY_ICON}</button>
-      </div>
-      <div class="mk-gc">
-        <span class="mk-txt mk-url">https://tienda.ejemplo.com/producto/421804</span><span class="mk-utm">?utm_source=ig</span>
-        <button class="copy-btn" tabindex="-1" type="button">${LINK_ICON}</button>
-      </div>
+    <div class="mk-row" style="background:#fff4ea"><input type="checkbox" checked tabindex="-1" /><span>409062</span><span class="mk-muted">${T(lang, 'Multimatch, no choice yet', 'Multimatch sin elegir')}</span><button class="multi-pick" type="button" tabindex="-1">Elegir (3)</button></div>
+    <div class="mk-row" style="background:#eef9ff"><input type="checkbox" checked tabindex="-1" /><span>445433</span><span class="mk-muted">${T(lang, 'Multimatch, chosen', 'Multimatch con elección')}</span><span class="mk-muted">pm-4454333</span></div>
+  </div>
+  <div class="mk-caption">${T(lang, 'Expanded choice table', 'Tabla de elección desplegada')}</div>
+  <div class="mock">
+    <div class="multi-box">
+      <div class="multi-pdf"><span class="multi-lbl">PDF</span><strong class="multi-code">409062</strong><span class="multi-ptitle">Sillón ocasional Cali rosa</span></div>
+      <div class="multi-grid multi-head"><span></span><span>ID en feed</span><span>${T(lang, 'Title · in feed', 'Título · en feed')}</span><span>#</span><span>${T(lang, 'Page', 'Pág.')}</span></div>
+      <div class="multi-grid on"><button class="btn sm" type="button" tabindex="-1">Elegido</button><strong class="multi-id">pm-4090623</strong><span class="multi-title">Sillón Ocasional Amaike Cali</span><span class="multi-num">1</span><span>3</span></div>
+      <div class="multi-grid"><button class="btn sm" type="button" tabindex="-1">Elegir</button><strong class="multi-id">pr-3409062-1</strong><span class="multi-title">Vestido Casual American Eagle talla 05</span><span class="multi-num">2</span><span>3</span></div>
     </div>
   </div>
-  <div class="mk-caption">${T(lang, 'Editable: double-click Título or URL', 'Editable: doble clic en Título o URL')}</div>`;
+  <div class="mk-caption">${T(lang, 'Change icon: hover the ID or name of a chosen row', 'Ícono de cambiar: pasa el mouse sobre el ID o nombre de una fila elegida')}</div>
+  <div class="mock mk-bar">
+    <span class="copy-btn" style="position:static;opacity:1;transform:none" tabindex="-1">${CHANGE_ICON}</span>
+    <span class="mk-muted">${T(lang, 'Click it to reopen the choice table', 'Haz clic para volver a abrir la tabla de elección')}</span>
+  </div>`;
+
+const visQuick = lang => `
+  <div class="mock">
+    <div class="mk-bar">
+      <span class="btn sm primary" tabindex="-1">${T(lang, 'Elegir en todas las filas', 'Elegir en todas las filas')}</span>
+      <span class="qs-hint">Opción 1: pm-4090623</span>
+    </div>
+    <div class="qs-badges">
+      <span class="qs-badge pending" aria-pressed="true">Multimatch sin elegir</span>
+      <span class="qs-badge picked" aria-pressed="true">Multimatch elegido</span>
+    </div>
+  </div>
+  <div class="mk-caption">${T(lang, 'Options table, PDF code highlighted', 'Tabla de opciones, código del PDF resaltado')}</div>
+  <div class="mock">
+    <div class="qs-tbl-wrap">
+      <table class="qs-tbl">
+        <thead><tr><th>#</th><th>ID en feed</th><th>${T(lang, 'Title in feed', 'Título en feed')}</th><th>SKU</th><th></th></tr></thead>
+        <tbody>
+          <tr class="sel"><td class="qs-num-cell">1</td><td class="qs-strong">pm-<mark class="qs-hl">4090623</mark></td><td>Sillón Ocasional Amaike Cali</td><td><mark class="qs-hl">409062</mark>3</td><td class="qs-act"><button class="btn sm" type="button" tabindex="-1">Elegir</button></td></tr>
+          <tr><td class="qs-num-cell">2</td><td class="qs-strong">pr-3<mark class="qs-hl">409062</mark>-1</td><td>Vestido Casual American Eagle talla 05</td><td><mark class="qs-hl">409062</mark></td><td class="qs-act"><button class="btn sm" type="button" tabindex="-1">Elegir</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>`;
 
 const visImages = lang => `
   <div class="mock">
@@ -100,7 +130,7 @@ const visImages = lang => `
     </div>
   </div>`;
 
-const visImageTools = lang => `
+const visImageTools = () => `
   <div class="mk-caption">Herramientas → Imágenes</div>
   <div class="mock">
     <div class="mk-tools">
@@ -134,13 +164,31 @@ const visPhotoMode = lang => `
     <div class="mk-photo-hint">← → · 1-9 · Esc</div>
   </div>`;
 
+const visLinks = lang => `
+  <div class="mock">
+    <div class="mk-grid">
+      <div class="mk-gh">Título</div>
+      <div class="mk-gh">URL</div>
+      <div class="mk-gc">
+        <span class="mk-txt">Sofá Naomi</span>
+        <button class="copy-btn" tabindex="-1" type="button">${COPY_ICON}</button>
+      </div>
+      <div class="mk-gc">
+        <span class="mk-txt mk-url">https://tienda.ejemplo.com/producto/421804</span><span class="mk-utm">?utm_source=ig</span>
+        <button class="copy-btn" tabindex="-1" type="button">${LINK_ICON}</button>
+      </div>
+    </div>
+  </div>
+  <div class="mk-caption">${T(lang, 'Editable: double-click Título or URL', 'Editable: doble clic en Título o URL')}</div>`;
+
 const visFilters = () => `
   <div class="mock">
     <div class="mk-bar">
       <span class="chip">12 filas</span>
       <span class="chip">10 activas</span>
       <span class="chip warn">3 sin título</span>
-      <span class="chip muted">2 sin match</span>
+      <span class="chip multi-pending">2 Multimatch sin elegir</span>
+      <span class="chip multi-picked">4 Multimatch elegido</span>
     </div>
     <div class="mk-bar">
       <label class="col-toggle"><input type="checkbox" checked tabindex="-1" /><span>Título</span></label>
@@ -164,6 +212,22 @@ const visExport = lang => `
   </div>
   <div class="mk-caption">${T(lang, 'Click Exportar Excel to open this window', 'Haz clic en Exportar Excel para abrir esta ventana')}</div>`;
 
+const visFeedCheck = lang => `
+  <div class="mock">
+    <div class="mk-bar">
+      <span class="mk-field">7090212</span>
+      <span class="mk-muted">${T(lang, 'Any part of an ID', 'Cualquier parte de un ID')}</span>
+    </div>
+    <div class="mk-grid" style="grid-template-columns:1.2fr 1fr 2fr">
+      <div class="mk-gh">g:id</div>
+      <div class="mk-gh">SKU</div>
+      <div class="mk-gh">Título</div>
+      <div class="mk-gc"><span>pr-<mark class="qs-hl">7090212</mark></span></div>
+      <div class="mk-gc">709021</div>
+      <div class="mk-gc">Sofá Naomi</div>
+    </div>
+  </div>`;
+
 /* ---------------- Páginas ---------------- */
 
 const PAGES = [
@@ -173,7 +237,7 @@ const PAGES = [
     body: {
       en: `
         <p><strong>Briefing File</strong></p>
-        <p>This tool turns a PDF product catalog into a table you can review, correct, and export to Excel in the briefing format. It also matches each product with the product feed, lets you choose and capture images, and exports the links with your UTM parameters.</p>
+        <p>This tool turns a PDF product catalog into a table you can review, correct, and export to Excel in the briefing format. It also matches each product with the product feed, resolves products with several feed matches, lets you choose and capture images, and exports the links with your UTM parameters.</p>
         <p>Everything you upload is read on your computer. The PDF is not sent to any server.</p>
         <p><strong>Disclaimer</strong></p>
         <p>This project is <strong>not a product of iPaper</strong>. iPaper is not responsible for its use, maintenance, operation, or the results it produces.</p>
@@ -184,7 +248,7 @@ const PAGES = [
         </ul>`,
       es: `
         <p><strong>Briefing File</strong></p>
-        <p>Esta herramienta convierte un catálogo de productos en PDF en una tabla que puedes revisar, corregir y exportar a Excel en el formato de briefing. También cruza cada producto con el feed, permite elegir y capturar imágenes, y exporta los enlaces con tus parámetros UTM.</p>
+        <p>Esta herramienta convierte un catálogo de productos en PDF en una tabla que puedes revisar, corregir y exportar a Excel en el formato de briefing. También cruza cada producto con el feed, resuelve los productos con varias coincidencias, permite elegir y capturar imágenes, y exporta los enlaces con tus parámetros UTM.</p>
         <p>Todo lo que subes se lee en tu computadora. El PDF no se envía a ningún servidor.</p>
         <p><strong>Aviso importante</strong></p>
         <p>Este proyecto <strong>no es un producto de iPaper</strong>. iPaper no se hace responsable de su uso, mantenimiento, funcionamiento ni de los resultados que produzca.</p>
@@ -206,7 +270,7 @@ const PAGES = [
           <li>Open the app with Live Server: right-click <code>index.html</code> and choose "Open with Live Server".</li>
           <li>Drag your PDF onto the start screen, or click to choose it.</li>
         </ol>
-        <p>You can upload the PDF while the feed is still loading. The app waits for the feed before showing the table, and the <strong>Feed listo</strong> (Feed ready) pill at the top shows whether the feed is ready.</p>`,
+        <p>You can upload the PDF while the feed is still loading. The app waits for the feed before showing the table, and the <strong>Feed listo</strong> (Feed ready) pill shows whether the feed is ready.</p>`,
       es: `
         <ol>
           <li>Inicia el servidor del feed: ejecuta <code>py feed_server.py</code> en la terminal y déjala abierta.</li>
@@ -225,20 +289,26 @@ const PAGES = [
         <p>Each row is one product. Use the checkbox in <strong>Activo</strong> (Active) to include or exclude a row. Click the row number to jump to that product in the PDF preview.</p>
         <p>Row colors:</p>
         <ul>
-          <li><strong>Yellow:</strong> no title found in the PDF. Double-click the title to type it.</li>
-          <li><strong>Red on the left:</strong> only the code was found, with no title or price. Check the PDF.</li>
+          <li><strong>Yellow:</strong> no title found in the PDF.</li>
+          <li><strong>Red on the left:</strong> only the code was found, with no title or price.</li>
+          <li><strong>Orange:</strong> multimatch, no choice yet.</li>
+          <li><strong>Light blue:</strong> multimatch with a choice made.</li>
           <li><strong>Lilac:</strong> manual row you added.</li>
           <li><strong>Gray, struck through:</strong> deactivated. It won't be exported.</li>
-        </ul>`,
+        </ul>
+        <p>Double-click a title, SKU, or page to edit it. Press Enter to save or Escape to cancel.</p>`,
       es: `
         <p>Cada fila es un producto. Usa la casilla de <strong>Activo</strong> para incluir o excluir una fila. Haz clic en el número de fila para ir a ese producto en la vista previa del PDF.</p>
         <p>Colores de las filas:</p>
         <ul>
-          <li><strong>Amarillo:</strong> no se encontró el título en el PDF. Haz doble clic en el título para escribirlo.</li>
-          <li><strong>Rojo a la izquierda:</strong> solo se encontró el código, sin título ni precio. Revísalo en el PDF.</li>
+          <li><strong>Amarillo:</strong> no se encontró el título en el PDF.</li>
+          <li><strong>Rojo a la izquierda:</strong> solo se encontró el código, sin título ni precio.</li>
+          <li><strong>Naranja:</strong> multimatch, todavía sin elegir.</li>
+          <li><strong>Azul claro:</strong> multimatch con una elección hecha.</li>
           <li><strong>Lila:</strong> fila manual que agregaste.</li>
           <li><strong>Gris tachado:</strong> desactivada. No se exporta.</li>
-        </ul>`
+        </ul>
+        <p>Haz doble clic en un título, SKU o página para editarlo. Enter guarda y Escape cancela.</p>`
     },
     visual: visRows
   },
@@ -256,7 +326,55 @@ const PAGES = [
     visual: visManual
   },
   {
-    // 5: enlaces, copiar, columnas editables y UTM
+    // 5: multimatch en la tabla
+    title: { en: 'Multimatch: several feed matches', es: 'Multimatch: varias coincidencias' },
+    body: {
+      en: `
+        <p>The code from the PDF can appear in more than one feed ID. The app matches the code <strong>anywhere inside the feed ID</strong>, so <code>409062</code> matches <code>pm-4090623</code> and <code>pr-3409062-1</code>.</p>
+        <ul>
+          <li><strong>One match:</strong> the row is filled automatically.</li>
+          <li><strong>Several matches:</strong> the ID column shows <strong>Elegir (N)</strong> and the row turns orange.</li>
+        </ul>
+        <p>Click <strong>Elegir (N)</strong> to open the choice table under the row. The first line is the PDF code and title. Each line below is one feed option. Click <strong>Elegir</strong> on the one you want. The row takes its ID, name, URL, and images, and turns light blue.</p>
+        <p>To change a choice later, hover over the ID or name of the row and click the change icon.</p>`,
+      es: `
+        <p>El código del PDF puede aparecer en más de un ID del feed. La aplicación busca el código <strong>en cualquier parte del ID del feed</strong>, así que <code>409062</code> coincide con <code>pm-4090623</code> y <code>pr-3409062-1</code>.</p>
+        <ul>
+          <li><strong>Una sola coincidencia:</strong> la fila se llena automáticamente.</li>
+          <li><strong>Varias coincidencias:</strong> la columna ID muestra <strong>Elegir (N)</strong> y la fila se pinta de naranja.</li>
+        </ul>
+        <p>Haz clic en <strong>Elegir (N)</strong> para abrir la tabla de elección debajo de la fila. La primera línea es el código y el título del PDF. Cada línea siguiente es una opción del feed. Haz clic en <strong>Elegir</strong> en la que quieras. La fila toma su ID, nombre, URL e imágenes, y se pinta de azul claro.</p>
+        <p>Para cambiar una elección después, pasa el mouse sobre el ID o el nombre de la fila y haz clic en el ícono de cambiar.</p>`
+    },
+    visual: visMulti
+  },
+  {
+    // 6: ventana de selección de multimatch
+    title: { en: 'Selection of multimatch', es: 'Selección de multimatch' },
+    body: {
+      en: `
+        <p>Click <strong>Selección de multimatch</strong> in <strong>Herramientas</strong> to resolve several rows at once.</p>
+        <ul>
+          <li><strong>Left column:</strong> every multimatch row, with its PDF SKU and, if chosen, its feed ID and name. Click a row to open it.</li>
+          <li><strong>Badges:</strong> <strong>Multimatch sin elegir</strong> and <strong>Multimatch elegido</strong> filter the left column. Both are on by default. Click one to hide or show that group.</li>
+          <li><strong>Elegir en todas las filas</strong> (top) applies the highlighted option to every unpicked row that follows the same pattern. The status line shows how many rows were filled.</li>
+          <li><strong>Options table:</strong> the PDF SKU is highlighted in each option's ID and SKU. Click <strong>Elegir</strong> to choose an option for the current row. The window moves to the next row.</li>
+        </ul>
+        <p><strong>Keys:</strong> <strong>1 to 9</strong> choose that option, <strong>↑ ↓</strong> highlight an option, <strong>← →</strong> move between rows, and <strong>Esc</strong> closes the window.</p>`,
+      es: `
+        <p>Haz clic en <strong>Selección de multimatch</strong> en <strong>Herramientas</strong> para resolver varias filas a la vez.</p>
+        <ul>
+          <li><strong>Columna izquierda:</strong> cada fila con multimatch, con su SKU del PDF y, si ya se eligió, su ID y nombre del feed. Haz clic en una fila para abrirla.</li>
+          <li><strong>Badges:</strong> <strong>Multimatch sin elegir</strong> y <strong>Multimatch elegido</strong> filtran la columna izquierda. Ambos empiezan activos. Haz clic en uno para ocultar o mostrar ese grupo.</li>
+          <li><strong>Elegir en todas las filas</strong> (arriba) aplica la opción resaltada a todas las filas sin elegir que sigan el mismo patrón. La línea de estado indica cuántas filas se llenaron.</li>
+          <li><strong>Tabla de opciones:</strong> el SKU del PDF se resalta en el ID y en el SKU de cada opción. Haz clic en <strong>Elegir</strong> para elegir una opción para la fila actual. La ventana pasa a la siguiente fila.</li>
+        </ul>
+        <p><strong>Teclas:</strong> <strong>1 a 9</strong> eligen esa opción, <strong>↑ ↓</strong> resaltan una opción, <strong>← →</strong> cambian de fila y <strong>Esc</strong> cierra la ventana.</p>`
+    },
+    visual: visQuick
+  },
+  {
+    // 7: enlaces, copiar, columnas editables y UTM
     title: { en: 'Links, copy buttons, and editable columns', es: 'Enlaces, copiar y columnas editables' },
     body: {
       en: `
@@ -271,7 +389,7 @@ const PAGES = [
     visual: visLinks
   },
   {
-    // 6: imágenes y estados
+    // 8: imágenes y estados
     title: { en: 'Images', es: 'Imágenes' },
     body: {
       en: `
@@ -290,7 +408,7 @@ const PAGES = [
     visual: visImages
   },
   {
-    // 7: herramientas de imágenes
+    // 9: herramientas de imágenes
     title: { en: 'Image tools and capture', es: 'Herramientas de imágenes y captura' },
     body: {
       en: `
@@ -315,14 +433,14 @@ const PAGES = [
     visual: visImageTools
   },
   {
-    // 8: modo selección de fotos
+    // 10: modo selección de fotos
     title: { en: 'Photo selection mode', es: 'Modo selección de fotos' },
     body: {
       en: `
         <p><strong>Photo selection mode</strong> (Modo selección de fotos) opens a large window for reviewing products one at a time.</p>
         <ul>
           <li>The list on the left shows every product with a feed ID. Click a row to open it.</li>
-          <li>The grid on the right shows that product's images. Click an image to turn it on or off.</li>
+          <li>The grid on the right shows that product's images. Click an image, or press its number, to turn it on or off.</li>
           <li><strong>Keyboard shortcuts:</strong> <strong>← →</strong> change product, <strong>1 to 9</strong> turn the matching image on or off, and <strong>Esc</strong> closes the window.</li>
           <li><strong>Activar todas</strong>, <strong>Desactivar todas</strong>, <strong>Solo la 1ª</strong>, and <strong>Solo la 2ª</strong> inside this window only affect the product you're viewing.</li>
         </ul>`,
@@ -338,30 +456,51 @@ const PAGES = [
     visual: visPhotoMode
   },
   {
-    // 9: filtros y columnas
+    // 11: filtros y columnas
     title: { en: 'Filters and columns', es: 'Filtros y columnas' },
     body: {
       en: `
-        <p>Under <strong>Herramientas</strong> (Tools), the filter chips show only the rows you pick (active, manual, no title, no match, and so on). Filters only hide rows and never delete anything.</p>
+        <p>Under <strong>Herramientas</strong> (Tools), the filter chips show only the rows you pick: active, manual, no title, no match, in feed or out of feed, and the two multimatch groups. Filters only hide rows and never delete anything.</p>
         <p>Under <strong>Columnas en tabla</strong> (Table columns), hiding a column only changes the view, not the Excel file.</p>`,
       es: `
-        <p>En <strong>Herramientas</strong>, los filtros muestran solo las filas que elijas (activas, manuales, sin título, sin match, etc.). Los filtros solo ocultan filas y nunca borran nada.</p>
+        <p>En <strong>Herramientas</strong>, los filtros muestran solo las filas que elijas: activas, manuales, sin título, sin match, en feed o fuera de feed, y los dos grupos de multimatch. Los filtros solo ocultan filas y nunca borran nada.</p>
         <p>En <strong>Columnas en tabla</strong>, ocultar una columna solo cambia la vista, no el archivo de Excel.</p>`
     },
     visual: visFilters
   },
   {
-    // 10: exportación
+    // 12: exportación
     title: { en: 'Exporting to Excel', es: 'Exportar a Excel' },
     body: {
       en: `
         <p>Click <strong>Exportar Excel</strong> (Export Excel). In the window that opens, choose which columns to include: SKU is always included, plus Title, Chapter (page number), and Link. Then click <strong>Descargar Excel</strong> (Download Excel).</p>
-        <p>Only active rows are exported.</p>`,
+        <p>Only active rows are exported. Multimatch rows you never chose are exported with the PDF code as <code>product_id</code>, so you can find and fix them.</p>`,
       es: `
         <p>Haz clic en <strong>Exportar Excel</strong>. En la ventana que se abre, elige qué columnas incluir: SKU siempre va incluido, además de Título, Capítulo (número de página) y Link. Luego haz clic en <strong>Descargar Excel</strong>.</p>
-        <p>Solo se exportan las filas activas.</p>`
+        <p>Solo se exportan las filas activas. Las filas multimatch que nunca se eligieron se exportan con el código del PDF como <code>product_id</code>, para que las encuentres y corrijas.</p>`
     },
     visual: visExport
+  },
+  {
+    // 13: página de revisión de ID
+    title: { en: 'Revisar ID (feed check)', es: 'Revisar ID (página de revisión)' },
+    body: {
+      en: `
+        <p>Click <strong>Revisar ID</strong> on the start screen or in the top bar. It opens a search page on the feed server.</p>
+        <ul>
+          <li>Type any part of an ID, for example <code>7090212</code>. Every feed ID that contains it appears, with the matching part highlighted.</li>
+          <li>The status pill at the top right shows whether the feed server is ready.</li>
+          <li><strong>← Volver a Briefing File</strong> returns to the application.</li>
+        </ul>`,
+      es: `
+        <p>Haz clic en <strong>Revisar ID</strong> en la pantalla de inicio o en la barra superior. Se abre una página de búsqueda en el servidor del feed.</p>
+        <ul>
+          <li>Escribe cualquier parte de un ID, por ejemplo <code>7090212</code>. Aparecen todos los IDs del feed que lo contienen, con la parte coincidente resaltada.</li>
+          <li>La pastilla de estado arriba a la derecha indica si el servidor del feed está listo.</li>
+          <li><strong>← Volver a Briefing File</strong> regresa a la aplicación.</li>
+        </ul>`
+    },
+    visual: visFeedCheck
   }
 ];
 

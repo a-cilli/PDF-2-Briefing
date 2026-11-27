@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Revisar ID en feed</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, system-ui, "Segoe UI", Roboto, sans-serif; background: #f4f5f9; color: #1b1f2a; font-size: 14px; }
+    main { max-width: 980px; margin: 0 auto; padding: 2rem 1.25rem; }
+    h1 { margin: 0; font-size: 1.5rem; letter-spacing: -0.02em; }
+    .header-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.3rem; }
+    .sub { margin: 0 0 1.25rem; color: #6b7280; }
+    input { width: 100%; padding: 0.7rem 0.9rem; font-size: 16px; border: 1px solid #e6e8ee; border-radius: 12px; background: #fff; color: inherit; }
+    input:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 3px #eef0ff; }
+    .status { margin: 0.8rem 0; min-height: 1.2em; color: #6b7280; font-weight: 600; font-size: 13px; }
+    .status.err { color: #b42318; }
+    .card { background: #fff; border: 1px solid #e6e8ee; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.06), 0 4px 16px rgba(16,24,40,.06); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; background: #fafbfc; color: #6b7280; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; padding: .7rem .75rem; border-bottom: 1px solid #e6e8ee; }
+    td { padding: .55rem .75rem; border-bottom: 1px solid #f0f1f5; vertical-align: top; overflow-wrap: anywhere; }
+    tr:last-child td { border-bottom: none; }
+    mark { background: #facc15; color: inherit; border-radius: 3px; padding: 0 1px; }
+    .empty { padding: 2rem; text-align: center; color: #6b7280; font-style: italic; }
+    a { color: #4f46e5; word-break: break-all; }
+
+    /* Badge de estado (copia de .feed-pill de styles.css) */
+    .feed-pill { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 11px; font-weight: 600; text-decoration: none; white-space: nowrap; color: #6b7280; background: #fff; border: 1px solid #e6e8ee; box-shadow: 0 1px 2px rgba(16,24,40,.06), 0 4px 16px rgba(16,24,40,.06); }
+    .feed-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: #9ca3af; flex: none; }
+    .feed-pill[data-state="ready"] { color: #047857; background: #ecfdf5; border-color: #a7f3d0; }
+    .feed-pill[data-state="ready"] .dot { background: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,.2); }
+    .feed-pill[data-state="loading"] { color: #92400e; background: #fffbeb; border-color: #fde68a; }
+    .feed-pill[data-state="loading"] .dot { background: #f59e0b; animation: pulse 1.2s ease-in-out infinite; }
+    .feed-pill[data-state="error"] { color: #9a3412; background: #fff7ed; border-color: #fed7aa; }
+    .feed-pill[data-state="error"] .dot { background: #f97316; }
+    .feed-pill[data-state="down"] { color: #b91c1c; background: #fef2f2; border-color: #fecaca; }
+    .feed-pill[data-state="down"] .dot { background: #ef4444; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.8); } }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="header-row">
+      <h1>Revisar ID en feed</h1>
+      <a class="feed-pill" data-feed href="/status" target="_blank" rel="noopener" data-state="checking" title="Estado del servidor"><span class="dot"></span><span class="txt">Comprobando…</span></a>
+    </div>
+    <p class="sub"><a href="http://127.0.0.1:5500/index.html">← Volver a Briefing File</a></p>
+    <p class="sub">Escribe un ID o parte de él. Se muestran todos los g:id del feed que lo contengan.</p>
+    <input id="q" type="text" placeholder="Por ejemplo 7090212" autocomplete="off" spellcheck="false" autofocus />
+    <div id="status" class="status"></div>
+    <div class="card">
+      <table>
+        <thead>
+          <tr><th>g:id</th><th>SKU</th><th>Título</th><th>Link</th></tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    const input = document.getElementById('q');
+    const statusEl = document.getElementById('status');
+    const rows = document.getElementById('rows');
+    let timer = null;
+    let seq = 0;
+
+    // Badge de estado: usa las mismas clases .feed-pill definidas arriba.
+    const badge = document.querySelector('[data-feed]');
+    const badgeText = badge.querySelector('.txt');
+
+    function setBadge(state, label, title) {
+      badge.dataset.state = state;
+      badgeText.textContent = label;
+      badge.title = title || label;
+    }
+
+    async function checkStatus() {
+      let next = 2000;
+      try {
+        const res = await fetch('/status', { cache: 'no-store' });
+        const s = await res.json();
+        if (s.error) {
+          setBadge('error', 'Error del feed', s.error);
+          next = 5000;
+        } else if (!s.loaded) {
+          setBadge('loading', 'Cargando feed', 'El servidor está cargando el feed');
+        } else {
+          const entries = Number(s.entries).toLocaleString('es-MX');
+          setBadge('ready', 'Feed listo', `${entries} entradas · actualizado ${s.updated}`);
+          next = 15000;
+        }
+      } catch {
+        setBadge('down', 'Sin conexión', 'Servidor apagado: ejecuta feed_server.py');
+      }
+      setTimeout(checkStatus, next);
+    }
+
+    // Resalta la parte coincidente. Todo se escribe como texto, nunca como HTML.
+    function highlight(text, q) {
+      const frag = document.createDocumentFragment();
+      const i = text.toLowerCase().indexOf(q.toLowerCase());
+      if (i === -1 || !q) { frag.append(text); return frag; }
+      frag.append(text.slice(0, i));
+      const m = document.createElement('mark');
+      m.textContent = text.slice(i, i + q.length);
+      frag.append(m, text.slice(i + q.length));
+      return frag;
+    }
+
+    function cellWith(content) {
+      const td = document.createElement('td');
+      td.append(content);
+      return td;
+    }
+
+    function render(results, q) {
+      rows.replaceChildren();
+      if (!results.length) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 4;
+        td.className = 'empty';
+        td.textContent = 'Sin coincidencias.';
+        tr.append(td);
+        rows.append(tr);
+        return;
+      }
+      for (const r of results) {
+        const tr = document.createElement('tr');
+        const a = document.createElement('a');
+        a.href = r.link || '#';
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = r.link || '';
+        tr.append(
+          cellWith(highlight(r.id, q)),
+          cellWith(r.sku || '—'),
+          cellWith(r.title || '—'),
+          cellWith(r.link ? a : '—')
+        );
+        rows.append(tr);
+      }
+    }
+
+    async function search() {
+      const q = input.value.trim();
+      const mine = ++seq;
+      if (q.length < 2) {
+        rows.replaceChildren();
+        statusEl.className = 'status';
+        statusEl.textContent = q ? 'Escribe al menos 2 caracteres.' : '';
+        return;
+      }
+      statusEl.className = 'status';
+      statusEl.textContent = 'Buscando…';
+      try {
+        const res = await fetch('/search?q=' + encodeURIComponent(q), { cache: 'no-store' });
+        const data = await res.json();
+        if (mine !== seq) return;   // llegó una búsqueda más reciente
+        if (!res.ok) {
+          statusEl.className = 'status err';
+          statusEl.textContent = data.error || 'Error al buscar';
+          rows.replaceChildren();
+          return;
+        }
+        let msg = `${data.total} coincidencia${data.total === 1 ? '' : 's'}`;
+        if (data.truncated) msg += ` (se muestran las primeras ${data.results.length})`;
+        statusEl.textContent = msg;
+        render(data.results, q);
+      } catch {
+        if (mine !== seq) return;
+        statusEl.className = 'status err';
+        statusEl.textContent = 'No se pudo conectar con el servidor del feed.';
+        rows.replaceChildren();
+      }
+    }
+
+    input.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(search, 250);
+    });
+
+    checkStatus();
+  </script>
+</body>
+</html>

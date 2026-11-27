@@ -1,5 +1,7 @@
 import { tbody, openExportBtn } from './dom.js';
-import { state } from '../state.js';
+import { state, requestRender } from '../state.js';
+import { applyCandidate } from '../feed/lookup.js';
+import { syncQuickButton } from './quick.js';
 import { COLUMNS, FIXED_COLS, FLEX_COLS, FLEX_MIN_PX } from '../config.js';
 import { cell, fmt, isSoloSku, utmSuffix } from '../utils.js';
 import { FILTERS, renderSummary } from './filters.js';
@@ -11,6 +13,10 @@ import { imgButtonCell, imageSubRow, syncImagesCart } from './images.js';
 
 const TRASH_SVG = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
   <path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/><path d="M10 11v6M14 11v6"/>
+</svg>`;
+
+const CHANGE_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>
 </svg>`;
 
 // Número de columnas visibles. Las filas especiales lo usan para ocupar todo el ancho.
@@ -28,6 +34,7 @@ function newManualRow(after) {
     sku: '',
     feedCheck: undefined,   // undefined = sin revisar, 'found' = en feed, 'missing' = fuera de feed
     feedId: null, feedTitle: null, feedVia: null, feedError: null,
+    candidates: null, picked: false, multiOpen: false,
     title: 'n/a', titleFound: false,
     url: '',
     images: [],
@@ -71,27 +78,69 @@ function rowClass(r) {
     c.push('band-' + r.band);
     if (isSoloSku(r)) c.push('solo-sku');
     if (!r.titleFound) c.push('sin-titulo');
+    if (r.candidates) c.push(r.picked ? 'multi-picked-row' : 'multi-pending-row');
   }
   if (!r.activo) c.push('inactive');
   return c.join(' ');
+}
+
+// Botón "Elegir (N)" para filas con varios resultados sin elegir.
+function multiPickCell(r) {
+  const td = document.createElement('td');
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'multi-pick';
+  b.textContent = `Elegir (${r.candidates.length})`;
+  b.addEventListener('click', () => toggleMulti(r));
+  td.append(b);
+  return td;
+}
+
+// Botón de cambiar, visible al pasar el mouse sobre la celda (usa .copy-btn).
+function withChange(td, r, offset = 6) {
+  td.classList.add('copyable');
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'copy-btn change-btn';
+  b.style.right = offset + 'px';
+  b.title = 'Cambiar elección';
+  b.setAttribute('aria-label', 'Cambiar elección');
+  b.innerHTML = CHANGE_SVG;
+  b.addEventListener('click', e => {
+    e.stopPropagation();
+    e.preventDefault();
+    toggleMulti(r);
+  });
+  b.addEventListener('dblclick', e => e.stopPropagation());
+  td.appendChild(b);
+  return td;
+}
+
+function toggleMulti(r) {
+  r.multiOpen = !r.multiOpen;
+  requestRender();
 }
 
 function feedCell(r) {
   if (r.manual && r.feedCheck === undefined) return cell('pendiente de revisar', 'nofeed');
   if (r.feedError) return cell('feed no disponible', 'nofeed');
   if (!r.sku || r.sku === 'XXXXXX') return cell('—', 'nofeed');
+  if (r.candidates && !r.picked) return multiPickCell(r);
   if (!r.feedId) return cell('no se encontró en feed', 'nofeed');
-  return cell(r.feedId);
+  const td = cell(r.feedId);
+  return r.candidates ? withChange(td, r, 6) : td;
 }
 
-// Nombre en feed: con botón de copiar cuando hay texto.
+// Nombre en feed: con botón de copiar cuando hay texto. Con varios resultados, también cambiar.
 function feedNameCell(r) {
   if (r.manual && r.feedCheck === undefined) return cell('pendiente de revisar', 'nofeed');
   if (r.feedError) return cell('feed no disponible', 'nofeed');
   if (!r.sku || r.sku === 'XXXXXX') return cell('—', 'nofeed');
+  if (r.candidates && !r.picked) return cell('sin elegir', 'na');
   if (!r.feedTitle) return cell('no se encontró en feed', 'nofeed');
   const td = cell(r.feedTitle);
-  return withCopy(td, () => r.feedTitle);
+  withCopy(td, () => r.feedTitle);
+  return r.candidates ? withChange(td, r, 36) : td;
 }
 
 // URL editable. El UTM se muestra al final en otro color con CSS (data-utm).
@@ -104,6 +153,64 @@ function urlCell(r) {
     renderTable();
   });
   return withOpenLink(td, () => r.url);
+}
+
+// Fila desplegable con los candidatos de una fila con varios resultados.
+// Mini tabla desplegable: primero el dato del PDF, luego cada candidato del feed.
+function multiSubRow(r, span) {
+  const tr = document.createElement('tr');
+  tr.className = 'multi-row';
+  const td = document.createElement('td');
+  td.colSpan = span;
+
+  const ln = (tag, cls, text) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  };
+
+  const box = ln('div', 'multi-box');
+
+  // Primera fila: lo que dice el PDF.
+  const pdf = ln('div', 'multi-pdf');
+  pdf.append(
+    ln('span', 'multi-lbl', 'PDF'),
+    ln('strong', 'multi-code', r.sku),
+    ln('span', 'multi-ptitle', r.titleFound ? r.title : 'sin título en el PDF')
+  );
+  box.append(pdf);
+
+  // Encabezado de la mini tabla de candidatos.
+  const head = ln('div', 'multi-grid multi-head');
+  ['', 'ID en feed', 'Título · en feed', '#', 'Pág.'].forEach(t => head.append(ln('span', '', t)));
+  box.append(head);
+
+  // Un renglón por candidato. El # coincide con el número de Selección de multimatch.
+  r.candidates.forEach((c, i) => {
+    const on = r.picked && r.feedId === c.id;
+    const row = ln('div', 'multi-grid' + (on ? ' on' : ''));
+
+    const b = ln('button', 'btn sm', on ? 'Elegido' : 'Elegir');
+    b.type = 'button';
+    b.addEventListener('click', () => {
+      applyCandidate(r, c);   // cierra la sub-tabla al elegir
+      requestRender();
+    });
+
+    row.append(
+      b,
+      ln('strong', 'multi-id', c.id),
+      ln('span', 'multi-title', c.title || '—'),
+      ln('span', 'multi-num', String(i + 1)),
+      ln('span', '', r.pages.join(', '))
+    );
+    box.append(row);
+  });
+
+  td.append(box);
+  tr.append(td);
+  return tr;
 }
 
 // Construye una fila de la tabla. El orden de las celdas coincide con COLUMNS.
@@ -257,7 +364,8 @@ function layoutColumns() {
     th.hidden = state.hiddenCols.has(COLUMNS[i].key);
   });
   tbody.querySelectorAll('tr').forEach(tr => {
-    if (tr.classList.contains('gap') || tr.classList.contains('empty-row') || tr.classList.contains('img-row')) return;
+    if (tr.classList.contains('gap') || tr.classList.contains('empty-row') ||
+        tr.classList.contains('img-row') || tr.classList.contains('multi-row')) return;
     [...tr.children].forEach((td, i) => {
       td.hidden = state.hiddenCols.has(COLUMNS[i].key);
     });
@@ -304,7 +412,8 @@ export function renderTable() {
     // Con filtro activo no hay líneas "+", para no insertar filas en una vista incompleta.
     if (!filtered) tbody.appendChild(gapRow(i - 1, span, lastOpen));
     tbody.appendChild(buildRow(r, i));
-    // La fila de imágenes va justo debajo de su producto y no tiene número.
+    // La fila de candidatos y la de imágenes van justo debajo de su producto y no tienen número.
+    if (r.multiOpen && r.candidates) tbody.appendChild(multiSubRow(r, span));
     if (r.imgOpen) tbody.appendChild(imageSubRow(r, span));
     lastOpen = Boolean(r.imgOpen);
     shown++;
@@ -326,6 +435,7 @@ export function renderTable() {
   renderSummary(shown);
   syncManualButton();
   syncImagesCart();
+  syncQuickButton();
   openExportBtn.disabled = state.rows.length === 0;
 
   // Una fila manual recién creada abre su celda SKU para escribir.

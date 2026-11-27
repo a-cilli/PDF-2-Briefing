@@ -1,7 +1,28 @@
 import { API } from '../config.js';
 import { setFeedImages } from '../ui/images.js';
 
-// Envía SKU al servidor local y añade ID, nombre, URL e imágenes a cada fila.
+// Asigna un candidato a la fila: ID, nombre, URL e imágenes.
+export function applyCandidate(r, c) {
+  r.feedId = c.id;
+  r.feedTitle = c.title;
+  r.feedVia = c.via || 'g:id';
+  r.feedError = null;
+  if (c.link) r.url = c.link;
+  setFeedImages(r, c.images);
+  r.picked = true;
+  r.multiOpen = false;
+}
+
+// Quita la asignación del feed de la fila.
+export function clearFeed(r) {
+  r.feedId = null;
+  r.feedTitle = null;
+  r.feedVia = null;
+  r.picked = false;
+  setFeedImages(r, []);
+}
+
+// Envía los códigos al servidor. Un solo resultado se elige solo; varios quedan pendientes.
 export async function enrichFromFeed(list) {
   const skus = list.map(p => p.sku).filter(s => s !== 'XXXXXX');
   try {
@@ -12,22 +33,28 @@ export async function enrichFromFeed(list) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Error al consultar el feed');
+
     for (const p of list) {
-      const hit = data[p.sku];
-      p.feedId = hit ? hit.id : null;
-      p.feedTitle = hit ? hit.title : null;
-      p.feedVia = hit ? hit.via : null;
+      const matches = data[p.sku]?.matches || [];
+      p.candidates = null;
+      p.multiOpen = false;
       p.feedError = null;
-      if (hit && hit.link) p.url = hit.link;
-      setFeedImages(p, hit ? hit.images : []);
+
+      if (matches.length === 1) {
+        applyCandidate(p, matches[0]);
+      } else if (matches.length > 1) {
+        p.candidates = matches;
+        clearFeed(p);
+      } else {
+        clearFeed(p);
+      }
     }
   } catch (err) {
     for (const p of list) {
-      p.feedId = null;
-      p.feedTitle = null;
-      p.feedVia = null;
+      p.candidates = null;
+      p.multiOpen = false;
+      clearFeed(p);
       p.feedError = err.message;
-      setFeedImages(p, []);
     }
     throw err;
   }

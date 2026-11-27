@@ -1,6 +1,5 @@
 import { summaryEl } from './dom.js';
 import { state, requestRender } from '../state.js';
-import { isSoloSku } from '../utils.js';
 
 // Cada filtro solo decide qué filas se muestran. No borra ni modifica nada.
 export const FILTERS = {
@@ -8,9 +7,11 @@ export const FILTERS = {
   active:        r => r.activo,
   manual:        r => r.manual,
   notitle:       r => !r.titleFound,
-  nomatch:       r => !r.manual && !r.feedId && r.sku !== 'XXXXXX',
+  nomatch:       r => !r.manual && !r.feedId && !r.candidates && r.sku !== 'XXXXXX',
   manualFound:   r => r.manual && r.feedCheck === 'found',
-  manualMissing: r => r.manual && r.feedCheck === 'missing'
+  manualMissing: r => r.manual && r.feedCheck === 'missing',
+  multiPending:  r => Boolean(r.candidates) && !r.picked,
+  multiPicked:   r => Boolean(r.candidates) && Boolean(r.picked)
 };
 
 // Chip que actúa como botón. Clic = filtrar; clic de nuevo = quitar el filtro.
@@ -29,7 +30,7 @@ function filterChip(key, text, cls) {
   return b;
 }
 
-// Dibuja los chips de resumen. Los de manuales solo aparecen si existe alguna fila manual.
+// Dibuja los chips de resumen. Los de manuales y multimatch solo aparecen si hay filas de ese tipo.
 export function renderSummary(shown) {
   const rows = state.rows;
   const auto = rows.filter(r => !r.manual);
@@ -40,7 +41,9 @@ export function renderSummary(shown) {
     notitle: rows.filter(FILTERS.notitle).length,
     nomatch: auto.filter(FILTERS.nomatch).length,
     manualFound: rows.filter(FILTERS.manualFound).length,
-    manualMissing: rows.filter(FILTERS.manualMissing).length
+    manualMissing: rows.filter(FILTERS.manualMissing).length,
+    multiPending: rows.filter(FILTERS.multiPending).length,
+    multiPicked: rows.filter(FILTERS.multiPicked).length
   };
 
   const defs = [
@@ -51,6 +54,10 @@ export function renderSummary(shown) {
   if (counts.manual) {
     defs.push(['manualFound',   `${counts.manualFound} en feed`,       'teal']);
     defs.push(['manualMissing', `${counts.manualMissing} fuera de feed`, 'coral']);
+  }
+  if (counts.multiPending || counts.multiPicked) {
+    defs.push(['multiPending', `${counts.multiPending} Multimatch sin elegir`, 'multi-pending']);
+    defs.push(['multiPicked',  `${counts.multiPicked} Multimatch elegido`,     'multi-picked']);
   }
   defs.push(['notitle', `${counts.notitle} sin título`, counts.notitle ? 'warn' : '']);
   defs.push(['nomatch', `${counts.nomatch} sin match`,  counts.nomatch ? 'muted' : '']);
